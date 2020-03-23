@@ -523,7 +523,8 @@ extern size_t jl_arr_xtralloc_limit;
 
 void jl_init_types(void) JL_GC_DISABLED;
 void jl_init_box_caches(void);
-void jl_init_frontend(void);
+void jl_init_flisp(void);
+void jl_init_common_symbols(void);
 void jl_init_primitives(void) JL_GC_DISABLED;
 void jl_init_llvm(void);
 void jl_init_codegen(void);
@@ -743,6 +744,9 @@ STATIC_INLINE size_t jl_bt_entry_size(jl_bt_element_t *bt_entry) JL_NOTSAFEPOINT
         1 : 2 + jl_bt_num_jlvals(bt_entry) + jl_bt_num_uintvals(bt_entry);
 }
 
+//------------------------------
+// Stack walking and debug info lookup
+
 // Function metadata arising from debug info lookup of instruction pointer
 typedef struct {
     char *func_name;
@@ -820,6 +824,9 @@ STATIC_INLINE char *jl_copy_str(char **to, const char *from) JL_NOTSAFEPOINT
 JL_DLLEXPORT size_t jl_capture_interp_frame(jl_bt_element_t *bt_data,
         void *frameend, size_t space_remaining) JL_NOTSAFEPOINT;
 
+//--------------------------------------------------
+// Exception stack access and manipulation
+
 // Exception stack: a stack of pairs of (exception,raw_backtrace).
 // The stack may be traversed and accessed with the functions below.
 struct _jl_excstack_t { // typedef in julia.h
@@ -863,6 +870,7 @@ void jl_push_excstack(jl_excstack_t **stack JL_REQUIRE_ROOTED_SLOT JL_ROOTING_AR
                       jl_bt_element_t *bt_data, size_t bt_size);
 void jl_copy_excstack(jl_excstack_t *dest, jl_excstack_t *src) JL_NOTSAFEPOINT;
 
+//--------------------------------------------------
 // congruential random number generator
 // for a small amount of thread-local randomness
 // we could just use libc:`rand()`, but we want to ensure this is fast

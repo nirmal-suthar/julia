@@ -310,7 +310,7 @@ static void jl_ast_ctx_leave(jl_ast_context_t *ctx) JL_NOTSAFEPOINT
     JL_UNLOCK_NOGC(&flisp_lock);
 }
 
-void jl_init_frontend(void)
+void jl_init_flisp(void)
 {
     jl_ptls_t ptls = jl_get_ptls_states();
     if (jl_ast_ctx_using || jl_ast_ctx_freed)
@@ -322,7 +322,10 @@ void jl_init_frontend(void)
     // To match the one in jl_ast_ctx_leave
     JL_SIGATOMIC_BEGIN();
     jl_ast_ctx_leave(&jl_ast_main_ctx);
+}
 
+void jl_init_common_symbols(void)
+{
     empty_sym = jl_symbol("");
     call_sym = jl_symbol("call");
     invoke_sym = jl_symbol("invoke");
@@ -400,7 +403,7 @@ JL_DLLEXPORT void jl_lisp_prompt(void)
     // Make `--lisp` sigatomic in order to avoid triggering the sigint safepoint.
     // We don't have our signal handler registered in that case anyway...
     JL_SIGATOMIC_BEGIN();
-    jl_init_frontend();
+    jl_init_flisp();
     jl_ast_context_t *ctx = jl_ast_ctx_enter();
     JL_AST_PRESERVE_PUSH(ctx, old_roots, jl_main_module);
     fl_context_t *fl_ctx = &ctx->fl;
